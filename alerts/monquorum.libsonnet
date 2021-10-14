@@ -21,6 +21,22 @@
             },
           },
           {
+            alert: 'CephMonQuorumLost',
+            expr: |||
+              count(kube_pod_info{created_by_name=~"rook-ceph-mon-.*"}) by (namespace) < 2
+            |||,
+            'for': $._config.monQuorumLostTime,
+            labels: {
+              severity: 'critical',
+            },
+            annotations: {
+              message: 'Storage quorum is lost',
+              description: 'Storage cluster quorum is lost. Contact Support.',
+              storage_type: $._config.storageType,
+              severity_level: 'critical',
+            },
+          },
+          {
             alert: 'CephMonHighNumberOfLeaderChanges',
             expr: |||
               (ceph_mon_metadata{%(cephExporterSelector)s} * on (ceph_daemon) group_left() (rate(ceph_mon_num_elections{%(cephExporterSelector)s}[5m]) * 60)) > 0.95
